@@ -8,6 +8,8 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.security.Principal;
+
 
 @Controller
 public class AdminController {
@@ -19,35 +21,34 @@ public class AdminController {
         this.roleService = roleService;
     }
     @GetMapping("/admin")
-    public String findAll(Model model){
+    public String findAll(Model model, Principal principal) {
         model.addAttribute("users", userService.getUsers());
+        model.addAttribute("admin", userService.findByUsername(principal.getName()));
+        model.addAttribute("newUser", new User());
+        model.addAttribute("allRoles", roleService.getAllRoles());
         return "table";
     }
-    @PostMapping("/addUser")
-    public String addUser(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleService.getAllRoles());
-        return "add_user";
-    }
+
     @PostMapping("/saveUser") //сохранение
-    public String saveUser(@ModelAttribute("user") User user){
+    public String saveUser(@ModelAttribute("user") User user) {
         userService.addUser(user);
         return "redirect:/admin";
     }
-    @PatchMapping("/updateUser")//редактирование
-    public String updateUser(@RequestParam("id") Long id, Model model) {
-        model.addAttribute("user", userService.getUser(id));
-        model.addAttribute("allRoles", roleService.getAllRoles());
-        return "update_user";
-    }
-    @PatchMapping("/updateUserData")
-    public String updateUserData(@ModelAttribute("update") User user) {
-        userService.updateUser(user);
+    @PatchMapping(value = "/admin/{id}")//редактирование
+    public String updateUser(@ModelAttribute("user") User user, @PathVariable("id") Long id) {
+        User userUpdate = userService.getUser(id);
+        userUpdate.setUsername(user.getUsername());
+        userUpdate.setPassword(user.getPassword());
+        userUpdate.setFirstName(user.getFirstName());
+        userUpdate.setLastName(user.getLastName());
+        userUpdate.setAge(user.getAge());
+        userUpdate.setRoles(user.getRoles());
+        userService.updateUser(userUpdate);
         return "redirect:/admin";
     }
 
-    @DeleteMapping("/deleteUser") //удаление
-    public String deleteUser(@RequestParam("id") Long id) {
+    @DeleteMapping("/admin/{id}/delete") //удаление
+    public String deleteUser(@PathVariable("id") Long id) {
         userService.deleteUser(id);
         return "redirect:/admin";
     }

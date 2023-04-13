@@ -11,14 +11,13 @@ import java.security.Principal;
 
 @Controller
 public class UserController {
-
     private final UserService userService;
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
     @GetMapping("/user")
-    public String findAll(Model model, Principal principal){
+    public String findAll(Model model, Principal principal) {
         model.addAttribute("user", userService.findByUsername(principal.getName()));
         return "user";
     }
