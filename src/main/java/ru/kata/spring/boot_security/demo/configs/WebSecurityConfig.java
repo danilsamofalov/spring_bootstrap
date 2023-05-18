@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.configs;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+import ru.kata.spring.boot_security.demo.service.LoadUserSecurity;
 import ru.kata.spring.boot_security.demo.service.PasswordEncoderService;
 
 import java.util.Collections;
@@ -22,14 +22,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final SuccessUserHandler successUserHandler;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoderService passwordEncoder;
+    private final LoadUserSecurity loadUserSecurity;
 
-    @Autowired
     public WebSecurityConfig(SuccessUserHandler successUserHandler,
                              UserDetailsService userDetailsService,
-                             PasswordEncoderService passwordEncoder) {
+                             PasswordEncoderService passwordEncoder,
+                             LoadUserSecurity loadUserSecurity) {
         this.successUserHandler = successUserHandler;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.loadUserSecurity = loadUserSecurity;
     }
 
     @Bean
@@ -59,7 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setPasswordEncoder(passwordEncoder.passwordEncoder());
-        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setUserDetailsService(loadUserSecurity);
         return authenticationProvider;
     }
 
